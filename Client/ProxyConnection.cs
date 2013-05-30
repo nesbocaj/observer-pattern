@@ -48,7 +48,12 @@ namespace Client
             {
                 var reader = new BinaryReader(_connection.GetStream());
                 var writer = new BinaryWriter(_connection.GetStream());
+
+                writer.Write(txt);
+                result = reader.ReadString();
+
             }
+            else throw se;
 
             return result;
         }
