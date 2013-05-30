@@ -6,26 +6,26 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    class Subject
+    class Provider
     {
-        private List<IObserver> _observers;
+        private List<ISubscriber> _observers;
 
-        public Subject()
+        public Provider()
         {
-            _observers = new List<IObserver>();
+            _observers = new List<ISubscriber>();
         }
 
-        public void RegisterObserver(IObserver observer)
+        public void RegisterSubscriber(ISubscriber observer)
         {
             _observers.Add(observer);
         }
 
-        public void UnregisterObserver(IObserver observer)
+        public void UnregisterSubscriber(ISubscriber observer)
         {
             _observers.Remove(observer);
         }
 
-        public void NotifyObservers() {
+        public void NotifySubscribers() {
             foreach (var observer in _observers)
             {
                 observer.Notify();

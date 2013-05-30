@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    interface IObserver
+    interface ISubscriber
     {
         void Notify();
     }
