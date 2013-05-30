@@ -14,16 +14,27 @@ namespace Server
 {
     class TcpConnection : ITcpConnection
     {
+        private static TcpConnection _instance;
         private IPAddress _address;
         private int _port;
         private TcpListener _listener;
-        private Provider _provider;
+        private TcpProvider _provider;
 
-        public TcpConnection()
+        private TcpConnection()
         {
             _address = IPAddress.Parse("127.0.0.1");
             _port = 7000;
             _listener = new TcpListener(_address, _port);
+        }
+
+        public static TcpConnection Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new TcpConnection();
+                return _instance;
+            }
         }
 
         public void Listen()
@@ -66,9 +77,12 @@ namespace Server
                 var command = reader.ReadString();
 
                 if (command.Contains("watch"))
-                    _provider.RegisterSubscriber();
+                {
+                    var subscriber = new TcpSubscriber(currentSocket);
+                    _provider.RegisterSubscriber(subscriber);
+                }
                 else
-                    Post(Request(command), currentSocket);
+                    Post(currentSocket, Request(command));
             }
             catch (Exception ex)
             {
@@ -79,16 +93,24 @@ namespace Server
             stream.Close();
         }
 
+        // for now just echoes the request
         public string Request(string txt)
         {
-            var result = "";
+            var result = txt;
 
             return result;
         }
 
-        public void Post(string txt)
-        {
+        public void Post(string txt) { }
 
+        public void Post(Socket socket, string txt)
+        {
+            var stream = new NetworkStream(socket);
+
+            using (var writer = new BinaryWriter(stream))
+            {
+                writer.Write(txt);
+            }
         }
     }
 }

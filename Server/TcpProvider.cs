@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TcpShared;
+
+namespace Server
+{
+    class TcpProvider : ITcpProvider
+    {
+        private static TcpProvider _instance;
+        private TcpConnection _connection;
+        private List<TcpSubscriber> _subscribers;
+
+        private TcpProvider()
+        {
+            _connection = TcpConnection.Instance;
+            _subscribers = new List<TcpSubscriber>();
+        }
+
+        public static TcpProvider Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new TcpProvider();
+                return _instance;
+            }
+        }
+
+        public void RegisterSubscriber(TcpSubscriber subscriber)
+        {
+            _subscribers.Add(subscriber);
+        }
+
+        public void UnregisterSubscriber(TcpSubscriber subscriber)
+        {
+            _subscribers.Remove(subscriber);
+        }
+
+        public void NotifySubscribers(string txt) {
+            foreach (var subscriber in _subscribers)
+                _connection.Post(subscriber.Socket, txt);
+        }
+    }
+}
