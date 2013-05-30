@@ -19,12 +19,13 @@ namespace Client
         {
             var prox = ProxyConnection.Instance;
             SocketException se = null;
-            String result = ""; // obsolete
+            String result = "";
 
             prox.Connect(prox.Client, out se);
             while (prox.Client.Connected)
             {
                 prox.DoWhenConnected(prox.Client.Connected, Behavior.ReadOnly, se, out result);
+                Console.WriteLine(result);
             }
         }
     }
