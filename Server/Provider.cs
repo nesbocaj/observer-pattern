@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TcpShared;
 
 namespace Client
 {
-    class Provider
+    class Provider : ITcpProvider
     {
-        private List<ISubscriber> _subscribers;
+        private List<ITcpSubscriber> _subscribers;
 
         public Provider()
         {
-            _subscribers = new List<ISubscriber>();
+            _subscribers = new List<ITcpSubscriber>();
         }
 
-        public void RegisterSubscriber(ISubscriber subscriber)
+        public void RegisterSubscriber(ITcpSubscriber subscriber)
         {
             _subscribers.Add(subscriber);
         }
 
-        public void UnregisterSubscriber(ISubscriber subscriber)
+        public void UnregisterSubscriber(ITcpSubscriber subscriber)
         {
             _subscribers.Remove(subscriber);
         }

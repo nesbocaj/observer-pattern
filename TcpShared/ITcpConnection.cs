@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client
+namespace TcpShared
 {
-    interface ISubscriber
+    public interface ITcpConnection
     {
-        void SubscribeTo(Provider provider);
-        void Notify();
+        string Request(string txt);
+        void Post(string txt);
     }
 }

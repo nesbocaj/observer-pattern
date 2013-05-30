@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TcpShared;
 
 namespace Client
 {
-    class Subscriber : ISubscriber
+    class Subscriber : ITcpSubscriber
     {
-        public void SubscribeTo(Provider provider)
+        public void SubscribeTo(ITcpProvider provider)
         {
             provider.RegisterSubscriber(this);
         }
