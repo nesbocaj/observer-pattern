@@ -13,6 +13,9 @@ namespace Client
     {
         private TcpClient _connection = null;
 
+        private enum Behavior {Read, Write, ReadWrite};
+
+
         public ProxyConnection()
         {
             _connection = new TcpClient();
@@ -37,6 +40,31 @@ namespace Client
             }
         }
 
+        private void DoWhenConnected(bool connected, Behavior behavior, SocketException se, out string result, string command = null)
+        {
+            result = null;
+
+            if (connected)
+            {
+                BinaryReader reader = null;
+                BinaryWriter writer = null;
+
+                // if the behavior is set to read it'll only read, if write it'll only write, if readwrite it'll do both
+                if (behavior == Behavior.Read || behavior == Behavior.ReadWrite)
+                    reader = new BinaryReader(_connection.GetStream());
+
+                if (behavior == Behavior.Write || behavior == Behavior.ReadWrite)
+                {
+                    writer = new BinaryWriter(_connection.GetStream());
+                    writer.Write(command);
+                }
+                if (behavior == Behavior.Read || behavior == Behavior.ReadWrite)
+                    result = reader.ReadString();
+
+            }
+            else throw se;
+        }
+
         public string Request(string txt)
         {
             var result = "";
@@ -44,16 +72,7 @@ namespace Client
 
             Connect(_connection, out se);
 
-            if (_connection.Connected)
-            {
-                var reader = new BinaryReader(_connection.GetStream());
-                var writer = new BinaryWriter(_connection.GetStream());
-
-                writer.Write(txt);
-                result = reader.ReadString();
-
-            }
-            else throw se;
+            DoWhenConnected(_connection.Connected, Behavior.ReadWrite, se, out result, txt);
 
             return result;
         }
