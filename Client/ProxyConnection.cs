@@ -14,28 +14,20 @@ namespace Client
     class ProxyConnection
     {
         private static ProxyConnection _instance = null;
-        private Library.ImprovedTcpClient _client;
-        private IPEndPoint _localEndpoint;
+        private TcpClient _client;
         private IPEndPoint _remoteEndpoint;
 
         private ProxyConnection()
         {
-            _client = new Library.ImprovedTcpClient();
-            _localEndpoint = _client.Client.LocalEndPoint as IPEndPoint;
+            _client = new TcpClient();
             _remoteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000);
         }
 
         public static ProxyConnection Instance { get { return _instance == null ? _instance = new ProxyConnection() : _instance; } }
 
-        public Library.ImprovedTcpClient Client
+        public TcpClient Client
         {
-            get
-            {
-                if (_client == null || _client.Disposed)
-                    _client = new Library.ImprovedTcpClient();
-
-                return _client;
-            }
+            get { return _client; }
         }
 
         public void Connect(out SocketException ex)
@@ -57,11 +49,11 @@ namespace Client
             }
         }
 
-        public void DoWhenConnected(bool connected, Behavior behavior, SocketException se, out string result, string command = null)
+        public void DoWhenConnected(Behavior behavior, SocketException se, out string result, string command = null)
         {
             result = null;
 
-            if (connected)
+            if (Client.Connected)
             {
                 BinaryReader reader = null;
                 BinaryWriter writer = null;
@@ -86,8 +78,6 @@ namespace Client
                         Console.WriteLine("Server has closed, and lef this message: {0}", ioe.Message);
                     }
                 }
-
-                Client.Close();
             }
             else throw se;
         }
@@ -97,7 +87,7 @@ namespace Client
             var result = "";
             SocketException se = null;
             Connect(out se);
-            DoWhenConnected(Client.Connected, Behavior.ReadWrite, se, out result, txt);
+            DoWhenConnected(Behavior.ReadWrite, se, out result, txt);
             return result;
         }
 
@@ -106,7 +96,7 @@ namespace Client
             var result = ""; // never needed but required since there's an out parameter
             SocketException se = null;
             Connect(out se);
-            DoWhenConnected(Client.Connected, Behavior.Write, se, out result, txt);
+            DoWhenConnected(Behavior.Write, se, out result, txt);
         }
     }
 }
