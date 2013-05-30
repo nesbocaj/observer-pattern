@@ -8,6 +8,7 @@ namespace Client
 {
     interface ISubscriber
     {
+        void SubscribeTo(Provider provider);
         void Notify();
     }
 }

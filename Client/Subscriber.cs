@@ -8,6 +8,11 @@ namespace Client
 {
     class Subscriber : ISubscriber
     {
+        public void SubscribeTo(Provider provider)
+        {
+            provider.RegisterSubscriber(this);
+        }
+
         public void Notify()
         {
             
