@@ -15,6 +15,8 @@ namespace Server
 
         public Program()
         {
+            Console.WriteLine("Provider Server");
+
             _connection = TcpConnection.Instance;
             _provider = TcpProvider.Instance;
             _messages = new string[] {
