@@ -13,8 +13,10 @@ namespace Client
             Console.WriteLine("Client");
 
             var connection = ProxyConnection.Instance;
+            var subscriber = new Subscriber();
 
             connection.Post("watch");
+            subscriber.Notify();
         }
     }
 }

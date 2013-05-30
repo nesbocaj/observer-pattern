@@ -62,9 +62,18 @@ namespace Client
                     writer.Write(command);
                 }
                 if (behavior == Behavior.ReadOnly || behavior == Behavior.ReadWrite)
-                    result = reader.ReadString();
+                {
+                    try
+                    {
+                        result = reader.ReadString();
+                    }
+                    catch (System.IO.IOException ioe)
+                    {
+                        Console.WriteLine("Server has closed, and lef this message: {0}", ioe.Message);
+                    }
+                }
 
-                Client.Close();
+                //Client.Close();
             }
             else throw se;
         }
