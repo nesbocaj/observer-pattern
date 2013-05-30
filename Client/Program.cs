@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Client
 {
@@ -16,7 +16,9 @@ namespace Client
             var subscriber = new Subscriber();
 
             connection.Post("watch");
-            subscriber.Notify();
+            var notifyWorker = new Thread(subscriber.Notify);
+            notifyWorker.Start();
+            connection.Request("helloes :3");
         }
     }
 }
