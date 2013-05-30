@@ -7,7 +7,7 @@ using TcpShared;
 
 namespace Server
 {
-    class TcpProvider : ITcpProvider
+    class TcpProvider
     {
         private static TcpProvider _instance;
         private TcpConnection _connection;

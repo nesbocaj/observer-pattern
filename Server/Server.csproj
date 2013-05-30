@@ -43,8 +43,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider.cs" />
+    <Compile Include="TcpProvider.cs" />
     <Compile Include="TcpConnection.cs" />
+    <Compile Include="TcpSubscriber.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
