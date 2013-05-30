@@ -80,7 +80,7 @@ namespace Client
             var result = ""; // never needed but required since there's an out parameter
             SocketException se = null;
             Connect(_connection, out se);
-            DoWhenConnected(_connection.Connected, Behavior.Write, se, out result);
+            DoWhenConnected(_connection.Connected, Behavior.Write, se, out result, txt);
 
         }
     }

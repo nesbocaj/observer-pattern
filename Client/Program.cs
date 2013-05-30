@@ -10,6 +10,11 @@ namespace Client
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Client");
+
+            var connection = new ProxyConnection();
+
+            connection.Post("watch");
         }
     }
 }
