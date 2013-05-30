@@ -5,15 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using TcpShared;
 
-namespace Client
+namespace Server
 {
     class Provider : ITcpProvider
     {
+        private static Provider _instance;
         private List<ITcpSubscriber> _subscribers;
 
-        public Provider()
+        private Provider()
         {
             _subscribers = new List<ITcpSubscriber>();
+        }
+
+        public static Provider Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new Provider();
+                return _instance;
+            }
         }
 
         public void RegisterSubscriber(ITcpSubscriber subscriber)
