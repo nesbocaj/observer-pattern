@@ -15,11 +15,23 @@ namespace Client
     {
         private static ProxyConnection _instance = null;
 
-        public TcpClient Client {get; set;}
+        private TcpClient _client;
+
+        private IPEndPoint _endpoint;
+
+        public TcpClient Client
+        { 
+            get 
+            {
+                if (_client == null) _client = new TcpClient(_endpoint);
+
+                return _client; 
+            } 
+        }
 
         private ProxyConnection()
         {
-            Client = new TcpClient();
+            _client = new TcpClient();
         }
 
         public static ProxyConnection Instance { get { return _instance == null ? _instance = new ProxyConnection() : _instance; } }
