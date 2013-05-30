@@ -47,7 +47,7 @@ namespace ReadWriteClient
                 {
                     if (client.Equals(ReadWriteClient))
                         client.Connect(_readWriteEndpoint);
-                    else if (client.Equals(ReadOnlyClient))
+                    if (client.Equals(ReadOnlyClient))
                         client.Connect(_readOnlyEndpoint);
                     break;
                 }
@@ -103,7 +103,14 @@ namespace ReadWriteClient
             var result = "";
             SocketException se = null;
             Connect(ReadWriteClient, out se);
-            DoWhenConnected(ReadWriteClient, Behavior.ReadWrite, se, out result, txt);
+            try
+            {
+                DoWhenConnected(ReadWriteClient, Behavior.ReadWrite, se, out result, txt);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine(se.Message);
+            }
             return result;
         }
 
@@ -114,12 +121,26 @@ namespace ReadWriteClient
             if (txt.Equals("watch", StringComparison.InvariantCultureIgnoreCase))
             {
                 Connect(ReadOnlyClient, out se);
-                DoWhenConnected(ReadOnlyClient, Behavior.Write, se, out result, txt);
+                try
+                {
+                    DoWhenConnected(ReadOnlyClient, Behavior.Write, se, out result, txt);
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine(se.Message);
+                }
             }
             else
             {
                 Connect(ReadWriteClient, out se);
-                DoWhenConnected(ReadWriteClient, Behavior.Write, se, out result, txt);
+                try
+                {
+                    DoWhenConnected(ReadWriteClient, Behavior.Write, se, out result, txt);
+                }
+                catch (SocketException ex)
+                {
+                    Console.WriteLine(se.Message);
+                }
             }
         }
     }
