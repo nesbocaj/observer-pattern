@@ -21,7 +21,7 @@ namespace Client
             SocketException se = null;
             String result = "";
 
-            prox.Connect(prox.Client, out se);
+            prox.Connect(out se);
             while (prox.Client.Connected)
             {
                 prox.DoWhenConnected(prox.Client.Connected, Behavior.ReadOnly, se, out result);

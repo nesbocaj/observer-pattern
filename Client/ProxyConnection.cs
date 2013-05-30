@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Net;
 using System.IO;
 
@@ -14,37 +13,39 @@ namespace Client
     class ProxyConnection
     {
         private static ProxyConnection _instance = null;
-
-        private TcpClient _client;
-
-        private IPEndPoint _endpoint;
-
-        public TcpClient Client
-        { 
-            get 
-            {
-                if (_client == null) _client = new TcpClient(_endpoint);
-
-                return _client; 
-            } 
-        }
+        private Library.ImprovedTcpClient _client;
+        private IPEndPoint _localEndpoint;
+        private IPEndPoint _remoteEndpoint;
 
         private ProxyConnection()
         {
-            _client = new TcpClient();
+            _client = new Library.ImprovedTcpClient();
+            _localEndpoint = _client.Client.LocalEndPoint as IPEndPoint;
+            _remoteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000);
         }
 
         public static ProxyConnection Instance { get { return _instance == null ? _instance = new ProxyConnection() : _instance; } }
 
-        public void Connect(TcpClient connection, out SocketException ex)
+        public Library.ImprovedTcpClient Client
+        {
+            get
+            {
+                if (_client == null || _client.Disposed)
+                    _client = new Library.ImprovedTcpClient();
+
+                return _client;
+            }
+        }
+
+        public void Connect(out SocketException ex)
         {
             ex = null;
 
-            for (int i = 0; i < 10 && !connection.Connected; i++)
+            for (int i = 0; i < 10 && !Client.Connected; i++)
             {
                 try
                 {
-                    connection.Connect(IPAddress.Parse("127.0.0.1"), 7000);
+                  Client.Connect(_remoteEndpoint);
                     break;
                 }
                 catch (SocketException se)
@@ -85,7 +86,7 @@ namespace Client
                     }
                 }
 
-                //Client.Close();
+                Client.Close();
             }
             else throw se;
         }
@@ -94,7 +95,7 @@ namespace Client
         {
             var result = "";
             SocketException se = null;
-            Connect(Client, out se);
+            Connect(out se);
             DoWhenConnected(Client.Connected, Behavior.ReadWrite, se, out result, txt);
             return result;
         }
@@ -103,7 +104,7 @@ namespace Client
         {
             var result = ""; // never needed but required since there's an out parameter
             SocketException se = null;
-            Connect(Client, out se);
+            Connect(out se);
             DoWhenConnected(Client.Connected, Behavior.Write, se, out result, txt);
         }
     }
