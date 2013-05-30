@@ -15,10 +15,21 @@ namespace Client
             _observers = new List<IObserver>();
         }
 
-        public void RegisterObserver(IObserver observer) { }
+        public void RegisterObserver(IObserver observer)
+        {
+            _observers.Add(observer);
+        }
 
-        public void UnregisterObserver(IObserver observer) { }
+        public void UnregisterObserver(IObserver observer)
+        {
+            _observers.Remove(observer);
+        }
 
-        public void NotifyObservers() { }
+        public void NotifyObservers() {
+            foreach (var observer in _observers)
+            {
+                observer.Notify();
+            }
+        }
     }
 }
