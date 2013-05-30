@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using TcpShared;
 
-namespace Client
+namespace ReadWriteClient
 {
     class Subscriber : ITcpSubscriber
     {
+        private ProxyConnection _prox;
+
         public void SubscribeTo(ITcpProvider provider)
         {
             provider.RegisterSubscriber(this);
@@ -17,18 +19,21 @@ namespace Client
 
         public void Notify()
         {
-            var prox = ProxyConnection.Instance;
+            if (_prox == null)
+                _prox = ProxyConnection.Instance;
+
             SocketException se = null;
             String result = "";
 
-            prox.Connect(out se);
-            while (prox.Client.Connected)
+            _prox.Connect(_prox.ReadOnlyClient, out se);
+
+            while (_prox.ReadOnlyClient.Connected)
             {
-                prox.DoWhenConnected(Behavior.ReadOnly, se, out result);
+                _prox.DoWhenConnected(_prox.ReadOnlyClient, Behavior.ReadOnly, se, out result);
                 Console.WriteLine(result);
             }
 
-            prox.Client.Close();
+            _prox.ReadOnlyClient.Close();
         }
     }
 }

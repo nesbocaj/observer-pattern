@@ -7,38 +7,48 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 
-namespace Client
+namespace ReadWriteClient
 {
     enum Behavior { ReadOnly, Write, ReadWrite };
 
     class ProxyConnection
     {
         private static ProxyConnection _instance = null;
-        private TcpClient _client;
-        private IPEndPoint _remoteEndpoint;
+        private TcpClient _readWriteClient, _readOnlyClient;
+        private IPEndPoint _readWriteEndpoint, _readOnlyEndpoint;
 
         private ProxyConnection()
         {
-            _client = new TcpClient();
-            _remoteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000);
+            _readWriteClient = new TcpClient();
+            _readOnlyClient = new TcpClient();
+            _readWriteEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000);
+            _readOnlyEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7001);
         }
 
         public static ProxyConnection Instance { get { return _instance == null ? _instance = new ProxyConnection() : _instance; } }
 
-        public TcpClient Client
+        public TcpClient ReadWriteClient
         {
-            get { return _client; }
+            get { return _readWriteClient; }
         }
 
-        public void Connect(out SocketException ex)
+        public TcpClient ReadOnlyClient
+        {
+            get { return _readOnlyClient; }
+        }
+
+        public void Connect(TcpClient client, out SocketException ex)
         {
             ex = null;
 
-            for (int i = 0; i < 10 && !Client.Connected; i++)
+            for (int i = 0; i < 10 && !ReadWriteClient.Connected; i++)
             {
                 try
                 {
-                  Client.Connect(_remoteEndpoint);
+                    if (client.Equals(ReadWriteClient))
+                        client.Connect(_readWriteEndpoint);
+                    else if (client.Equals(ReadOnlyClient))
+                        client.Connect(_readOnlyEndpoint);
                     break;
                 }
                 catch (SocketException se)
@@ -49,22 +59,22 @@ namespace Client
             }
         }
 
-        public void DoWhenConnected(Behavior behavior, SocketException se, out string result, string command = null)
+        public void DoWhenConnected(TcpClient client, Behavior behavior, SocketException se, out string result, string command = null)
         {
             result = null;
 
-            if (Client.Connected)
+            if (client.Connected)
             {
                 BinaryReader reader = null;
                 BinaryWriter writer = null;
 
                 // if the behavior is set to read it'll only read, if write it'll only write, if readwrite it'll do both
                 if (behavior == Behavior.ReadOnly || behavior == Behavior.ReadWrite)
-                    reader = new BinaryReader(Client.GetStream());
+                    reader = new BinaryReader(client.GetStream());
 
                 if (behavior == Behavior.Write || behavior == Behavior.ReadWrite)
                 {
-                    writer = new BinaryWriter(Client.GetStream());
+                    writer = new BinaryWriter(client.GetStream());
                     writer.Write(command);
                 }
                 if (behavior == Behavior.ReadOnly || behavior == Behavior.ReadWrite)
@@ -78,6 +88,12 @@ namespace Client
                         Console.WriteLine("Server has closed, and lef this message: {0}", ioe.Message);
                     }
                 }
+
+                if (client.Equals(ReadWriteClient))
+                {
+                    client.Close();
+                    client = new TcpClient();
+                }
             }
             else throw se;
         }
@@ -86,8 +102,8 @@ namespace Client
         {
             var result = "";
             SocketException se = null;
-            Connect(out se);
-            DoWhenConnected(Behavior.ReadWrite, se, out result, txt);
+            Connect(ReadWriteClient, out se);
+            DoWhenConnected(ReadWriteClient, Behavior.ReadWrite, se, out result, txt);
             return result;
         }
 
@@ -95,8 +111,16 @@ namespace Client
         {
             var result = ""; // never needed but required since there's an out parameter
             SocketException se = null;
-            Connect(out se);
-            DoWhenConnected(Behavior.Write, se, out result, txt);
+            if (txt.Equals("watch", StringComparison.InvariantCultureIgnoreCase))
+            {
+                Connect(ReadOnlyClient, out se);
+                DoWhenConnected(ReadOnlyClient, Behavior.Write, se, out result, txt);
+            }
+            else
+            {
+                Connect(ReadWriteClient, out se);
+                DoWhenConnected(ReadWriteClient, Behavior.Write, se, out result, txt);
+            }
         }
     }
 }
