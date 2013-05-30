@@ -8,27 +8,27 @@ namespace Client
 {
     class Provider
     {
-        private List<ISubscriber> _observers;
+        private List<ISubscriber> _subscribers;
 
         public Provider()
         {
-            _observers = new List<ISubscriber>();
+            _subscribers = new List<ISubscriber>();
         }
 
-        public void RegisterSubscriber(ISubscriber observer)
+        public void RegisterSubscriber(ISubscriber subscriber)
         {
-            _observers.Add(observer);
+            _subscribers.Add(subscriber);
         }
 
-        public void UnregisterSubscriber(ISubscriber observer)
+        public void UnregisterSubscriber(ISubscriber subscriber)
         {
-            _observers.Remove(observer);
+            _subscribers.Remove(subscriber);
         }
 
         public void NotifySubscribers() {
-            foreach (var observer in _observers)
+            foreach (var subscriber in _subscribers)
             {
-                observer.Notify();
+                subscriber.Notify();
             }
         }
     }
