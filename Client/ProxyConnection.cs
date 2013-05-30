@@ -61,6 +61,7 @@ namespace Client
                 if (behavior == Behavior.Read || behavior == Behavior.ReadWrite)
                     result = reader.ReadString();
 
+                _connection.Close();
             }
             else throw se;
         }
@@ -69,16 +70,17 @@ namespace Client
         {
             var result = "";
             SocketException se = null;
-
             Connect(_connection, out se);
-
             DoWhenConnected(_connection.Connected, Behavior.ReadWrite, se, out result, txt);
-
             return result;
         }
 
-        public void Post(string txt)
+        public void Post(string txt) // POST - Power On Self-Test
         {
+            var result = ""; // never needed but required since there's an out parameter
+            SocketException se = null;
+            Connect(_connection, out se);
+            DoWhenConnected(_connection.Connected, Behavior.Write, se, out result);
 
         }
     }
