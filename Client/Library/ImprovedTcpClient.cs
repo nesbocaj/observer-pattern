@@ -13,7 +13,7 @@ namespace Client.Library
 
         public ImprovedTcpClient() : base() { }
 
-        public ImprovedTcpClient(System.Net.IPEndPoint localEP) : base(System.Net.IPEndPoint localEP) { }
+        public ImprovedTcpClient(System.Net.IPEndPoint localEP) : base(localEP) { }
 
         public bool Disposed
         {
