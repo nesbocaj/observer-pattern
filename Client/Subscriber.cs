@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpShared;
@@ -16,7 +17,15 @@ namespace Client
 
         public void Notify()
         {
-            
+            var prox = ProxyConnection.Instance;
+            SocketException se = null;
+            String result = ""; // obsolete
+
+            prox.Connect(prox.Client, out se);
+            while (prox.Client.Connected)
+            {
+                prox.DoWhenConnected(prox.Client.Connected, Behavior.ReadOnly, se, out result);
+            }
         }
     }
 }

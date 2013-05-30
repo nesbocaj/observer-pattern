@@ -12,7 +12,7 @@ namespace Client
         {
             Console.WriteLine("Client");
 
-            var connection = new ProxyConnection();
+            var connection = ProxyConnection.Instance;
 
             connection.Post("watch");
         }

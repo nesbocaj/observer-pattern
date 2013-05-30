@@ -9,19 +9,22 @@ using System.IO;
 
 namespace Client
 {
+    enum Behavior { ReadOnly, Write, ReadWrite };
+
     class ProxyConnection
     {
-        private TcpClient _connection = null;
+        private static ProxyConnection _instance = null;
 
-        private enum Behavior {Read, Write, ReadWrite};
+        public TcpClient Client {get; set;}
 
-
-        public ProxyConnection()
+        private ProxyConnection()
         {
-            _connection = new TcpClient();
+            Client = new TcpClient();
         }
 
-        private void Connect(TcpClient connection, out SocketException ex)
+        public static ProxyConnection Instance { get { return _instance == null ? _instance = new ProxyConnection() : _instance; } }
+
+        public void Connect(TcpClient connection, out SocketException ex)
         {
             ex = null;
 
@@ -40,7 +43,7 @@ namespace Client
             }
         }
 
-        private void DoWhenConnected(bool connected, Behavior behavior, SocketException se, out string result, string command = null)
+        public void DoWhenConnected(bool connected, Behavior behavior, SocketException se, out string result, string command = null)
         {
             result = null;
 
@@ -50,18 +53,18 @@ namespace Client
                 BinaryWriter writer = null;
 
                 // if the behavior is set to read it'll only read, if write it'll only write, if readwrite it'll do both
-                if (behavior == Behavior.Read || behavior == Behavior.ReadWrite)
-                    reader = new BinaryReader(_connection.GetStream());
+                if (behavior == Behavior.ReadOnly || behavior == Behavior.ReadWrite)
+                    reader = new BinaryReader(Client.GetStream());
 
                 if (behavior == Behavior.Write || behavior == Behavior.ReadWrite)
                 {
-                    writer = new BinaryWriter(_connection.GetStream());
+                    writer = new BinaryWriter(Client.GetStream());
                     writer.Write(command);
                 }
-                if (behavior == Behavior.Read || behavior == Behavior.ReadWrite)
+                if (behavior == Behavior.ReadOnly || behavior == Behavior.ReadWrite)
                     result = reader.ReadString();
 
-                _connection.Close();
+                Client.Close();
             }
             else throw se;
         }
@@ -70,8 +73,8 @@ namespace Client
         {
             var result = "";
             SocketException se = null;
-            Connect(_connection, out se);
-            DoWhenConnected(_connection.Connected, Behavior.ReadWrite, se, out result, txt);
+            Connect(Client, out se);
+            DoWhenConnected(Client.Connected, Behavior.ReadWrite, se, out result, txt);
             return result;
         }
 
@@ -79,9 +82,8 @@ namespace Client
         {
             var result = ""; // never needed but required since there's an out parameter
             SocketException se = null;
-            Connect(_connection, out se);
-            DoWhenConnected(_connection.Connected, Behavior.Write, se, out result, txt);
-
+            Connect(Client, out se);
+            DoWhenConnected(Client.Connected, Behavior.Write, se, out result, txt);
         }
     }
 }
