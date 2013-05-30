@@ -31,11 +31,13 @@ namespace Server
                 "dog"
             };
 
+            var listenWorker = new Thread(_connection.Listen);
+            listenWorker.Name = "Listen Worker";
+            listenWorker.Start();
+
             var notifyWorker = new Thread(Notify);
             notifyWorker.Name = "Notify Worker";
             notifyWorker.Start();
-
-            _connection.Listen();
         }
 
         static void Main(string[] args)
@@ -48,6 +50,7 @@ namespace Server
             foreach (var message in _messages)
             {
                 _provider.NotifySubscribers(message);
+                
                 Thread.Sleep(1000);
             }
         }

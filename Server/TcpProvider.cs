@@ -15,7 +15,6 @@ namespace Server
 
         private TcpProvider()
         {
-            _connection = TcpConnection.Instance;
             _subscribers = new List<TcpSubscriber>();
         }
 
@@ -40,8 +39,17 @@ namespace Server
         }
 
         public void NotifySubscribers(string txt) {
+            if (_connection == null)
+                _connection = TcpConnection.Instance;
+
+            int i = 0;
+
             foreach (var subscriber in _subscribers)
+            {
                 _connection.Post(subscriber.Socket, txt);
+                Console.WriteLine("notified subscriber {0} about {1}", i, txt);
+                i++;
+            }
         }
     }
 }

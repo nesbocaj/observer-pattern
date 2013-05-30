@@ -25,6 +25,7 @@ namespace Server
             _address = IPAddress.Parse("127.0.0.1");
             _port = 7000;
             _listener = new TcpListener(_address, _port);
+            _provider = TcpProvider.Instance;
         }
 
         public static TcpConnection Instance
