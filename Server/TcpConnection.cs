@@ -15,16 +15,18 @@ namespace Server
     class TcpConnection : ITcpConnection
     {
         private static TcpConnection _instance;
-        private IPAddress _address;
-        private int _port;
+        private IPEndPoint _requestEndpoint;
+        private IPEndPoint _postEndpoint;
         private TcpListener _listener;
+        private TcpClient _client;
         private TcpProvider _provider;
 
         private TcpConnection()
         {
-            _address = IPAddress.Parse("127.0.0.1");
-            _port = 7000;
-            _listener = new TcpListener(_address, _port);
+            _requestEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7000);
+            _postEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7001);
+            _listener = new TcpListener(_requestEndpoint);
+            _client = new TcpClient(_postEndpoint);
             _provider = TcpProvider.Instance;
         }
 
@@ -106,9 +108,9 @@ namespace Server
 
         public void Post(Socket socket, string txt)
         {
-            var stream = new NetworkStream(socket);
+            _client.Connect(socket.RemoteEndPoint as IPEndPoint);
 
-            using (var writer = new BinaryWriter(stream))
+            using (var writer = new BinaryWriter(_client.GetStream()))
             {
                 writer.Write(txt);
             }
