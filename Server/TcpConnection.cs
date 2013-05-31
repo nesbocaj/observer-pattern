@@ -81,7 +81,11 @@ namespace Server
 
                 if (command.Contains("watch"))
                 {
-                    var subscriber = new TcpSubscriber(currentSocket);
+                    var parsed = ParseCommand(command);
+
+                    var endpoint = new IPEndPoint(IPAddress.Parse(parsed[1]), int.Parse(parsed[2]));
+
+                    var subscriber = new TcpSubscriber(endpoint);
                     _provider.RegisterSubscriber(subscriber);
                 }
                 else
@@ -108,12 +112,58 @@ namespace Server
 
         public void Post(Socket socket, string txt)
         {
-            _client.Connect(socket.RemoteEndPoint as IPEndPoint);
-
-            using (var writer = new BinaryWriter(_client.GetStream()))
+            try
             {
+                var stream = new NetworkStream(socket);
+                var writer = new BinaryWriter(stream);
                 writer.Write(txt);
             }
+            catch (IOException ioe) { }
+        }
+
+        public void Post(IPEndPoint endpoint, string txt)
+        {
+            try
+            {
+                _client.Connect(endpoint);
+
+                var writer = new BinaryWriter(_client.GetStream());
+                writer.Write(txt);
+            }
+            catch (IOException ioe) { }
+        }
+
+        private List<string> ParseCommand(string command)
+        {
+            bool inQuotes = false;
+            int i = 0;
+            List<string> arguments = new List<string>();
+            arguments.Add("");
+
+            foreach (char c in command)
+            {
+                switch (c)
+                {
+                    case ' ':
+                        if (!inQuotes)
+                        {
+                            arguments.Add("");
+                            i++;
+                        }
+                        break;
+                    case '"':
+                        if (!inQuotes)
+                            inQuotes = true;
+                        else
+                            inQuotes = false;
+                        break;
+                    default:
+                        arguments[i] += c;
+                        break;
+                }
+            }
+
+            return arguments;
         }
     }
 }

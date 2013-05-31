@@ -46,7 +46,7 @@ namespace Server
 
             foreach (var subscriber in _subscribers)
             {
-                _connection.Post(subscriber.Socket, txt);
+                _connection.Post(subscriber.EndPoint, txt);
                 Console.WriteLine("notified subscriber {0} about {1}", i, txt);
                 i++;
             }

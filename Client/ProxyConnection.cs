@@ -121,6 +121,10 @@ namespace ReadWriteClient
             if (txt.Equals("watch", StringComparison.InvariantCultureIgnoreCase))
             {
                 Connect(ReadOnlyClient, out se);
+
+                var endpoint = ReadOnlyClient.Client.LocalEndPoint as IPEndPoint;
+                txt = string.Format("{0} {1} {2}", txt, endpoint.Address.ToString(), endpoint.Port);
+
                 try
                 {
                     DoWhenConnected(ReadOnlyClient, Behavior.Write, se, out result, txt);
